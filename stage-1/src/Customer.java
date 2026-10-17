@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Random;
 
 public class Customer
 {
@@ -6,6 +7,7 @@ public class Customer
     private int satisfaction;
     private int arrivalTurn;
     private CustomerStatus status;
+    private static final Random rng = new Random();
 
     // Constructor
     public Customer(int id, int arrivalTurn)
@@ -44,11 +46,12 @@ public class Customer
 
 
     // Methods
-    public MenuItem orderFood(List<MenuItem> menu)
-    {
-        // Pre-Set Customer Menu Choice to index 0, edit here if want to change
-        return menu.get(0);
+    public MenuItem orderFood(List<MenuItem> menu) {
+        if (menu == null || menu.isEmpty()) return null;
+        int index = rng.nextInt(menu.size());
+        return menu.get(index);
     }
+
     public void reduceSatisfaction(int amount)
     {
         this.satisfaction -= amount;
