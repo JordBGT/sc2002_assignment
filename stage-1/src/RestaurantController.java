@@ -187,24 +187,14 @@ public class RestaurantController {
     public void executeTurn() {
         // Step 4: Eating & Automatic Cashier Payment
         // Handle customers eating -> ready to pay
-        for (Table table : tables) {
-            if (table.isOccupied()) {
-                Customer c = table.getCurrentCustomer();
-                if (c != null && c.getStatus() == CustomerStatus.SERVED) {
-                    // Transition to eating -> ready to pay after 1 full turn
-                    c.setStatus(CustomerStatus.READY_TO_PAY);
-                }
-            }
-        }
-
-        // Cashier collects payment from oldest READY_TO_PAY customer
         Table oldestReadyTable = null;
         int earliestArrival = Integer.MAX_VALUE;
+
         for (Table table : tables) {
             if (table.isOccupied() && table.getCurrentCustomer() != null) {
                 Customer c = table.getCurrentCustomer();
-                // A customer who became READY_TO_PAY this turn pays next turn at earliest
-                if (c.getStatus() == CustomerStatus.READY_TO_PAY && c.getArrivalTurn() < currentTurn) {
+                if (c.getStatus() == CustomerStatus.READY_TO_PAY) {
+                    // Prioritize oldest customer first (earliest arrivalTurn)
                     if (c.getArrivalTurn() < earliestArrival) {
                         earliestArrival = c.getArrivalTurn();
                         oldestReadyTable = table;
@@ -215,16 +205,41 @@ public class RestaurantController {
 
         if (oldestReadyTable != null) {
             Customer payingCustomer = oldestReadyTable.getCurrentCustomer();
+            Order payingOrder = oldestReadyTable.getCurrentOrder();
+
+            // Cashier collects bill
             int amount = cashier.processPayment(oldestReadyTable);
             revenueCents += amount;
             paidCustomersCount++;
             totalPaidSatisfaction += payingCustomer.getSatisfaction();
+
+            // Mark customer and order as PAID
             payingCustomer.setStatus(CustomerStatus.PAID);
+            if (payingOrder != null) {
+                payingOrder.setStatus(OrderStatus.PAID);
+            }
+
+            // Frees the table
             oldestReadyTable.clearTable();
         }
 
-        // Step 5: Waiting & Abandonment
-        // Queue customers lose satisfaction
+        // 4. Eating Progression
+        // A customer served on an earlier turn finishes 1 full turn eating -> READY_TO_PAY.
+        for (Table table : tables) {
+            if (table.isOccupied() && table.getCurrentCustomer() != null) {
+                Customer c = table.getCurrentCustomer();
+
+                if (c.getStatus() == CustomerStatus.EATING) {
+                    // Finished 1 full turn of eating -> now ready to pay (eligible next turn)
+                    c.setStatus(CustomerStatus.READY_TO_PAY);
+                } else if (c.getStatus() == CustomerStatus.SERVED) {
+                    // Customer served this turn begins eating
+                    c.setStatus(CustomerStatus.EATING);
+                }
+            }
+        }
+
+        // 5. Waiting Queue
         List<Customer> abandonedInQueue = new ArrayList<>();
         for (Customer c : waitingQueue) {
             c.reduceSatisfaction(8);
@@ -235,11 +250,12 @@ public class RestaurantController {
         }
         waitingQueue.removeAll(abandonedInQueue);
 
-        // Seated unserved customers lose satisfaction
+        // 5. Seated unserved customer decay
         for (Table table : tables) {
-            if (table.isOccupied()) {
+            if (table.isOccupied() && table.getCurrentCustomer() != null) {
                 Customer c = table.getCurrentCustomer();
-                if (c != null && (c.getStatus() == CustomerStatus.SEATED)) {
+                // Only unserved customers lose satisfaction
+                if (c.getStatus() == CustomerStatus.SEATED) {
                     c.reduceSatisfaction(8);
                     if (c.isAbandoned()) {
                         c.setStatus(CustomerStatus.ABANDONED);
@@ -261,7 +277,7 @@ public class RestaurantController {
         // Advance turn counter
         currentTurn++;
 
-        // Process scheduled customer arrival for the new turn
+        // Step 1: Process arrival for the new turn
         if (!isGameOver()) {
             checkAndProcessArrival();
         }
