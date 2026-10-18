@@ -29,7 +29,7 @@ This project is written in standard Java (JDK 17 or later) without external depe
 
 ---
 
-# 2. Customer Food Ordering
+## 2. Customer Food Ordering
 
 - Implementation: Customer orders are determined using seeded randomness
 ### Order Mapping for Reproducible Run
@@ -45,7 +45,7 @@ This project is written in standard Java (JDK 17 or later) without external depe
 
 ---
 
-# 3. Stage 1 Walkthrough
+## 3. Stage 1 Walkthrough
 
 ### Run 1: Victory Run
 - Objective: Fulfill all targets (>= 4 paid customers, >= $45.00 revenue, >= 60.0 average satisfaction).
@@ -118,7 +118,7 @@ Defeat! You did not meet all manager objectives.
 ```
 
 ---
-# 4. Stage 1 Class and Objects
+## 4. Stage 1 Class and Objects
 
   - Domain Entities:
       - Customer.java and CustomerStatus.java: Manages customer satisfaction,
