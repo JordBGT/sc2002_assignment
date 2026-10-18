@@ -27,7 +27,7 @@ This project is written in standard Java (JDK 17 or later) without external depe
 2.  Locate to the main class `RestaurantCLI.java`
 3.  Right-click RestaurantCLI.java and select Run 'RestaurantCLI.main()'.
 
----
+
 
 ## 2. Customer Food Ordering
 
@@ -43,7 +43,7 @@ This project is written in standard Java (JDK 17 or later) without external depe
 | **Customer #5** | Salad | 1 unit | $9.00 |
 | **Customer #6** | Burger | 1 unit | $15.00 |
 
----
+
 
 ## 3. Stage 1 Walkthrough
 
@@ -117,7 +117,7 @@ Average Satisfaction   : 0.0 (Target: >= 60.0)
 Defeat! You did not meet all manager objectives.
 ```
 
----
+
 ## 4. Stage 1 Class and Objects
 
   - Domain Entities:
@@ -141,7 +141,7 @@ Defeat! You did not meet all manager objectives.
       - RestaurantCLI.java: Text interface handling game rendering and user
         inputs 
 
----
+
 
 
 
