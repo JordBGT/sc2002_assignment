@@ -39,7 +39,7 @@ public class Waiter extends Staff
             Order order = table.getCurrentOrder();
             Customer customer = table.getCurrentCustomer();
 
-            if(order.isReady() && order!= null && customer != null)
+            if(order != null && customer != null && order.isReady())
             {
                 order.setStatus(OrderStatus.SERVED);
                 customer.setStatus(CustomerStatus.SERVED);
@@ -47,7 +47,4 @@ public class Waiter extends Staff
             }
         }
     }
-
-
-
 }

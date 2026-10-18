@@ -17,7 +17,7 @@ public class Cashier extends Staff
             Order order = table.getCurrentOrder();
 
             // If customer READY TO PAY
-            if(customer.getStatus() == CustomerStatus.READY_TO_PAY && customer != null && order != null) {
+            if(customer != null && order != null && customer.getStatus() == CustomerStatus.READY_TO_PAY) {
                 // Get the Money $$$ and clear Table
                 int collectedAmtCents = order.getPrice();
                 customer.setStatus(CustomerStatus.PAID);

@@ -7,7 +7,7 @@ public class Customer
     private int satisfaction;
     private int arrivalTurn;
     private CustomerStatus status;
-    private static final Random rng = new Random();
+    private static final Random rng = new Random(42);      // FIXED SEED HERE, CHANGE THIS FOR NEW SEED
 
     // Constructor
     public Customer(int id, int arrivalTurn)

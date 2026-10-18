@@ -11,7 +11,7 @@ public class Chef extends Staff
     public void cookOrder(Order order)
     {
         // If notActed and notOrderReady
-        if(!hasActedThisTurn && !order.isReady() && order != null)
+        if(!hasActedThisTurn && order != null && !order.isReady())
         {
             order.advancePrep();
             setActed(true);
