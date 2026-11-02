@@ -1,0 +1,181 @@
+@startuml
+!pragma teoz true
+hide footbox
+skinparam backgroundColor white
+skinparam sequenceMessageAlign center
+skinparam ParticipantPadding 15
+skinparam BoxPadding 10
+title Restaurant Rush Stage 3\nCustomer 3 combo during Happy Hour in the victory replay
+actor Manager as M
+boundary RestaurantCLI as CLI
+control RestaurantController as RC
+participant "host: Host" as H
+participant "customer3: Customer" as C
+participant "happyHour: HappyHourPolicy" as HH
+participant "waiter: Waiter" as W
+participant "chef: Chef" as CH
+participant "order3: Order" as O
+participant "table1: Table" as T
+participant "cashier: Cashier" as CA
+note over CLI,CA
+Precondition: victory-input.txt, turns 1-6 completed; Table 1 is free.
+Customer 3 is Regular. Other customers' concurrent actions are omitted.
+Repeated getters, validation internals and redundant setActed calls are abbreviated.
+end note
+== Arrival and manager choice: turn 7 ==
+CLI -> RC: executeTurn() [end of turn 6]
+RC -> RC: currentTurn++; checkAndProcessArrival()
+create C
+RC -> C: new Customer(3, 7)
+RC -> C: setStatus(QUEUED)
+RC -> RC: waitingQueue.add(customer3)
+M -> CLI: Activate Happy Hour at start of turn 7
+CLI -> RC: startTurn(true)
+RC -> HH: activate()
+HH --> RC: true; remainingTurns = 2
+loop [each queued / occupied-table customer while active]
+RC -> C: recoverSatisfaction(15)
+note right of C: QUEUED or SEATED only; maximum 100.
+end
+CLI -> RC: getHappyHourRemainingTurns()
+RC -> HH: getRemainingTurns()
+HH --> RC: 2
+RC --> CLI: 2
+M -> CLI: Host seats at Table 1
+CLI -> RC: executeHostTask(1)
+RC -> H: seatCustomer(customer3, table1)
+H -> T: seatCustomer(customer3)
+T -> C: setStatus(SEATED)
+H -> H: setActed(true)
+H --> RC: true
+RC -> RC: waitingQueue.remove(0)
+M -> CLI: Waiter takes order at Table 1
+loop [retry until a valid Waiter choice]
+CLI -> RC: executeWaiterTask(2, 1)
+alt [invalid table / status / already ordered / staff used]
+RC --> CLI: false; explain reason; task not consumed
+else [valid: seated, no order, Waiter unused, Chef not acted]
+RC -> C: orderFood(menu)
+C --> RC: Burger + Pasta Combo (2970 cents, 3 units)
+RC -> HH: priceFor(customer3, item)
+HH -> C: getDiscountedPrice(2970)
+C --> HH: 2970 (Regular)
+HH --> RC: round(2970 * 0.8) = 2376
+RC -> W: takeOrder(table1, item, 3, 2376)
+create O
+W -> O: new Order(3, item, 2376)
+note right of O: ORDERED, 3 units; final billCents = 2376.
+W -> T: assignOrder(order3)
+W -> W: setActed(true)
+W --> RC: order3
+RC --> CLI: true
+CLI -> M: Show chosen combo, preparation units and locked bill
+end
+end
+note over H,W
+Manager's choice changes the flow: Host seating leaves the Waiter free to order on turn 7.
+Using the Waiter to seat instead consumes its task and delays ordering until turn 8 or later.
+Without activation on turn 7, this new order locks at $29.70, instead of $23.76.
+end note
+== Cooking across turns 7-9 ==
+loop [turns 7, 8, 9; one Chef unit each turn]
+opt [turn 8 or 9]
+CLI -> RC: startTurn(false)
+opt [turn 8: Happy Hour still active]
+RC -> C: recoverSatisfaction(15)
+note right of C: Turn 8: 92 -> 100; no recovery on turn 9.
+end
+CLI -> RC: executeHostTask(0)
+CLI -> RC: executeWaiterTask(0, 0)
+end
+M -> CLI: Assign Chef to order 3
+CLI -> RC: executeChefTask(3)
+RC -> CH: cookOrder(order3)
+CH -> O: advancePrep()
+alt [remainingUnits > 0]
+O -> O: status = PREPARING
+else [remainingUnits = 0 on turn 9]
+O -> O: status = READY
+end
+CH -> CH: setActed(true)
+CLI -> RC: executeTurn()
+RC -> C: getSatisfactionLoss()
+C --> RC: 8
+RC -> C: reduceSatisfaction(8)
+RC -> HH: endTurn()
+note over HH,O: Happy Hour remaining after turn 7 = 1; after turn 8 = 0. Locked bill stays 2376.
+RC -> H: resetTurn()
+RC -> W: resetTurn()
+RC -> CH: resetTurn()
+RC -> CA: resetTurn()
+RC -> RC: currentTurn++; checkAndProcessArrival()
+end
+note over W,O
+Chef completes order 3 on turn 9, after the Waiter's task.
+The Waiter can first serve it on turn 10. Satisfaction after turn 9 = 84.
+end note
+== Serving: turn 10 ==
+CLI -> RC: startTurn(false)
+CLI -> RC: executeHostTask(2) [seats customer 4; detail omitted]
+M -> CLI: Prioritize READY order 3 over taking customer 4's order
+CLI -> RC: executeWaiterTask(3, 1)
+RC -> O: getStatus()
+O --> RC: READY
+RC -> W: serveOrder(table1)
+W -> T: getCurrentOrder(); getCurrentCustomer()
+W -> O: setStatus(SERVED)
+W -> C: setStatus(SERVED)
+W -> W: setActed(true)
+RC -> RC: servedCount++
+CLI -> RC: executeChefTask(0)
+CLI -> RC: executeTurn()
+note over RC,CA: Payment scan precedes eating progression; this customer is not READY_TO_PAY.
+RC -> C: setStatus(EATING) [was SERVED]
+note over C,O: No satisfaction decay after serving. Customer 3 remains at 84.
+RC -> HH: endTurn()
+RC -> RC: reset staff; advance to turn 11; process arrivals
+== Eating: turn 11 ==
+note over CLI,RC: startTurn(false), Host Wait; Waiter and Chef work on customer 4 (omitted).
+CLI -> RC: executeTurn()
+RC -> C: setStatus(READY_TO_PAY) [was EATING]
+note over RC,CA: Became ready this turn; payment cannot occur until next turn.
+RC -> HH: endTurn()
+RC -> RC: reset staff; advance to turn 12; process arrivals
+== Payment: turn 12 ==
+note over CLI,RC: startTurn(false), Host Wait, Waiter Wait, Chef cooks order 4 (omitted).
+CLI -> RC: executeTurn()
+RC -> RC: scan tables for oldest READY_TO_PAY by arrivalTurn
+opt [oldestReadyTable = table1]
+RC -> CA: processPayment(table1)
+CA -> T: getCurrentCustomer(); getCurrentOrder()
+CA -> O: getPrice()
+O --> CA: 2376 (bill locked on turn 7)
+CA -> C: setStatus(PAID)
+CA -> O: setStatus(PAID)
+CA -> T: clearTable()
+CA -> CA: setActed(true)
+CA --> RC: 2376
+RC -> RC: revenueCents += 2376; paidCustomersCount++
+RC -> C: getSatisfaction()
+C --> RC: 84
+RC -> RC: totalPaidSatisfaction += 84
+note over RC,T: Controller also repeats PAID assignments and clearTable(); duplicates omitted.
+end
+RC -> HH: endTurn()
+RC -> RC: reset staff; advance to turn 13; process arrivals
+== Continue and check final result ==
+loop [remaining turns 13-18; same CLI / controller turn flow]
+CLI -> RC: startTurn(false); staff assignments; executeTurn()
+note over CLI,RC: Same victory replay continues; no early ending.
+end
+CLI -> RC: isGameOver()
+RC --> CLI: true [currentTurn = 19]
+CLI -> RC: checkGameResult()
+alt [paid >= 4 AND revenueCents >= 4500 AND average >= 60]
+RC --> CLI: VICTORY (5 paid, 7926 cents, average 83.8)
+else [any target unmet]
+RC --> CLI: DEFEAT
+end
+CLI -> CLI: displayGameOver(result, controller)
+CLI -> M: Show final result and totals
+@enduml
