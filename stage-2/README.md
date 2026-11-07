@@ -159,3 +159,12 @@ Average Satisfaction   : 68.0 (Target: >= 60.0)
 ========================================================
 Defeat! You did not meet all manager objectives.
 ```
+## 6. Sequence Diagram
+The 'Stage2_SequenceDiagram' traces VIP Customer #2 through both victory and defeat run from above. 
+The diagram focuses on the VIP Customer but the results are accumulative from other customers as per the table.
+- **Victory Run** : On turn 6, the manager chooses TakrOrder(2) from Table 2 and selects Order #2 for the chef. The manager
+serves the VIP on turn 7. On turn 9, the cashier returns the Salad's original price of \$9.00, and the controller applies the
+VIP's 10% discount and records $8.10 in revenue. 
+- **Defear Run**: On turn 6, the manager chooses Skip(0). The VIP's order is taken and cooked on turn 15 and served on turn 17. 
+On turn 18, the controller checks for payment while the VIP is still EATING. The VIP becomes READY_TO_PAY later that turn, after 
+the last payment check, so no VIP payment is collected.
