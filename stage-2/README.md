@@ -39,7 +39,7 @@ The `Customer` class was updated with three additional methods: `getSatisfaction
 
 ## 3. Critic Customer Behaviour
 
-Critic customers have a distinct food-ordering preference, prioritising menu items priced above **$10.00**.
+Critic customers choose the most expensive item priced above **$10.00**, breaking ties by menu order. With the base menu, that item is Pasta. If no item qualifies, they use the regular seeded selection rule.
 
 Unlike Regular customers, Critic customers have a higher satisfaction loss rate of **12 points per waiting turn**.
 
@@ -131,7 +131,7 @@ Congratulations! You met all manager targets!
 | **15** | `2` | `2` | `3` | Takes Order #3 (Salad) from VIP Customer #2. Chef finishes cooking. |
 | **16** | `0` | — | (Auto-waits) | Waiter skips. Customer #6 (Regular) arrives. |
 | **17** | `3` | `2` | (Auto-waits) | Serves Order #3 to VIP Customer #2. |
-| **18** | `0` | — | (Auto-waits) | Waiter skips. VIP Customer #2 is still eating, so payment is not collected before the game ends. |
+| **18** | `0` | — | (Auto-waits) | Waiter skips. VIP Customer #2 becomes READY_TO_PAY after the final payment check, so no payment is collected. |
 
 **Defeat Behaviour:**
 
@@ -143,7 +143,7 @@ Congratulations! You met all manager targets!
     - Critic: 12 points per waiting turn.
 4. Customer #1 pays \$18.00 at Turn 6, while Customer #3 pays $9.00 at Turn 14.
 5. VIP Customer #2 receives food at Turn 17 but does not reach payment before the game ends.
-6. Critic Customer #4 remains in the waiting queue and has not placed an order.
+6. Critic Customer #4 never places an order and abandons the queue at the end of turn 18.
 7. The restaurant earns only $27.00 from 2 paid customers, failing the revenue and customer-count targets.
 
 **Defeat Output at Game Over:**
@@ -168,3 +168,14 @@ VIP's 10% discount and records $8.10 in revenue.
 - **Defear Run**: On turn 6, the manager chooses Skip(0). The VIP's order is taken and cooked on turn 15 and served on turn 17. 
 On turn 18, the controller checks for payment while the VIP is still EATING. The VIP becomes READY_TO_PAY later that turn, after 
 the last payment check, so no VIP payment is collected.
+
+
+## 7. Build and Run Instructions
+
+Use JDK 17 or later. From the repository root, compile and run Stage 2 separately:
+
+```sh
+cd stage-2/src
+javac *.java
+java RestaurantCLI
+```

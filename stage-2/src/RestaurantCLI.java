@@ -1,4 +1,5 @@
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class RestaurantCLI {
@@ -16,6 +17,8 @@ public class RestaurantCLI {
                 controller.getPaidCustomersCount(),
                 controller.getPaidCustomersCount() == 0 ? "N/A" : String.format("%.1f", controller.getAverageSatisfaction()));
         System.out.println("========================================================");
+
+        System.out.println("Staff: Waiter seats, takes orders or serves; Chef prepares one unit; Cashier automatically collects one payment.");
 
         // Display Waiting Queue
         System.out.print("Waiting Queue: ");
@@ -65,6 +68,11 @@ public class RestaurantCLI {
                 int targetTableId = readInt();
                 boolean success = controller.executeWaiterTask(choice, targetTableId);
                 if (success) {
+                    if (choice == 2) {
+                        Order order = controller.getTableById(targetTableId).getCurrentOrder();
+                        System.out.printf("Customer chose %s | Prep: %d%n",
+                                order.getItem().getName(), order.getRemainingUnits());
+                    }
                     return choice;
                 }
                 System.out.println("Please re-select a valid action.");
@@ -104,6 +112,9 @@ public class RestaurantCLI {
 
     public void displayTurnSummary(RestaurantController controller) {
         System.out.println("\n>>> Turn processing finished. <<<");
+        System.out.printf("Served: %d | Unhappy departures: %d | Turns used: %d | Paid avg: %s%n",
+                controller.getServedCount(), controller.getUnhappyDepartures(), controller.getCurrentTurn() - 1,
+                controller.getPaidCustomersCount() == 0 ? "N/A" : String.format("%.1f", controller.getAverageSatisfaction()));
         System.out.printf("End of Turn %d State: Revenue: $%.2f | Paid Customers: %d\n",
                 controller.getCurrentTurn() - 1,
                 controller.getRevenueCents() / 100.0,
@@ -118,7 +129,7 @@ public class RestaurantCLI {
         System.out.printf("Total Revenue          : $%.2f (Target: >= $45.00)\n", controller.getRevenueCents() / 100.0);
         System.out.printf("Paid Customers Count   : %d (Target: >= 4)\n", controller.getPaidCustomersCount());
         System.out.printf("Average Satisfaction   : %s (Target: >= 60.0)\n",
-                controller.getPaidCustomersCount() == 0 ? "0.0" : String.format("%.1f", controller.getAverageSatisfaction()));
+                controller.getPaidCustomersCount() == 0 ? "N/A" : String.format("%.1f", controller.getAverageSatisfaction()));
         System.out.println("========================================================");
 
         if (result == GameResult.VICTORY) {
@@ -139,26 +150,30 @@ public class RestaurantCLI {
         }
     }
 
-    // main method to launch and test Stage 1
+    // main method to launch Stage 2
     public static void main(String[] args) {
         RestaurantController controller = new RestaurantController();
         RestaurantCLI cli = new RestaurantCLI();
 
-        while (!controller.isGameOver()) {
-            cli.displayTurnStart(controller);
-            cli.promptWaiterAction(controller);
+        try {
+            while (!controller.isGameOver()) {
+                cli.displayTurnStart(controller);
+                cli.promptWaiterAction(controller);
 
-            if (controller.hasOrdersToCook()) {
-                cli.promptChefAction(controller);
-            } else {
-                System.out.println("\n[Chef]: No cookable orders this turn (Chef waits).");
-                controller.executeChefTask(0);
+                if (controller.hasOrdersToCook()) {
+                    cli.promptChefAction(controller);
+                } else {
+                    System.out.println("\n[Chef]: No cookable orders this turn (Chef waits).");
+                    controller.executeChefTask(0);
+                }
+
+                controller.executeTurn();
+                cli.displayTurnSummary(controller);
             }
 
-            controller.executeTurn();
-            cli.displayTurnSummary(controller);
+            cli.displayGameOver(controller.checkGameResult(), controller);
+        } catch (NoSuchElementException e) {
+            System.out.println("\nInput ended. Game closed.");
         }
-
-        cli.displayGameOver(controller.checkGameResult(), controller);
     }
 }

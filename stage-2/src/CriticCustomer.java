@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CriticCustomer extends Customer{
     public CriticCustomer(int id, int arrivalTurn){
@@ -18,21 +16,15 @@ public class CriticCustomer extends Customer{
             return null;
         }
 
-        List<MenuItem> preferredItems = new ArrayList<>();
-
-        for(MenuItem item: menu){
-            if (item.getPriceCents() > 1000){
-                preferredItems.add(item);
+        // Prefer the most expensive item above $10, keeping menu order for ties.
+        MenuItem preferred = null;
+        for (MenuItem item : menu) {
+            if (item.getPriceCents() > 1000
+                    && (preferred == null || item.getPriceCents() > preferred.getPriceCents())) {
+                preferred = item;
             }
         }
-
-        //In exception case where no items cost more than $10, use regular selection
-        if(preferredItems.isEmpty()){
-            return super.orderFood(menu);
-        }
-
-        Random rand = new Random();
-        return preferredItems.get(rand.nextInt(preferredItems.size()));
+        return preferred == null ? super.orderFood(menu) : preferred;
     }
 
     @Override
