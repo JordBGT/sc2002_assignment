@@ -18,7 +18,7 @@ This project is written in standard Java (JDK 17 or later) without external depe
 
 3.  Run the application: 
     ```
-    java RestaurantCLI.java
+    java RestaurantCLI
     ```
 
 ### Using an IDE (IntelliJ IDEA / Eclipse / VS Code)
@@ -100,7 +100,7 @@ For all Turns 1 to 18, enter 0 (Wait / Skip) at every prompt:
     queue.
 2.  Because no customers are seated or served, every waiting customer suffers
     satisfaction decay (-8 points per turn).
-3.  Starting at turn 14, customers reach 0 satisfaction and abandon the
+3.  Starting at the end of turn 13, customers reach 0 satisfaction and abandon the
     restaurant without paying.
 4.  No orders are placed, no food is cooked, and no payments are collected.
 
@@ -112,7 +112,7 @@ For all Turns 1 to 18, enter 0 (Wait / Skip) at every prompt:
 Final Result           : DEFEAT
 Total Revenue          : $0.00 (Target: >= $45.00)
 Paid Customers Count   : 0 (Target: >= 4)
-Average Satisfaction   : 0.0 (Target: >= 60.0)
+Average Satisfaction   : N/A (Target: >= 60.0)
 ========================================================
 Defeat! You did not meet all manager objectives.
 ```

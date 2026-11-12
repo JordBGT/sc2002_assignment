@@ -8,6 +8,8 @@ public class RestaurantController {
     private int revenueCents = 0;
     private int paidCustomersCount = 0;
     private int totalPaidSatisfaction = 0;
+    private int servedCount;
+    private int unhappyDepartures;
 
     private final List<Table> tables;
     private final List<Customer> waitingQueue;
@@ -24,6 +26,8 @@ public class RestaurantController {
     public int getCurrentTurn() { return currentTurn; }
     public int getMaxTurns() { return maxTurns; }
     public int getRevenueCents() { return revenueCents; }
+    public int getServedCount() { return servedCount; }
+    public int getUnhappyDepartures() { return unhappyDepartures; }
     public int getPaidCustomersCount() { return paidCustomersCount; }
     public List<Table> getTables() { return tables; }
     public List<Customer> getWaitingQueue() { return waitingQueue; }
@@ -86,6 +90,11 @@ public class RestaurantController {
     }
 
     public boolean executeWaiterTask(int choice, int target) {
+        if (isGameOver()) return false;
+        if (chef.hasActed()) {
+            System.out.println("Waiter must act before Chef.");
+            return false;
+        }
         if(waiter.hasActed()) {
             System.out.println("Waiter has already acted this turn.");
             return false;
@@ -144,6 +153,7 @@ public class RestaurantController {
                     return false;
                 }
                 waiter.serveOrder(table);
+                servedCount++;
                 waiter.setActed(true);
                 return true;
 
@@ -159,6 +169,11 @@ public class RestaurantController {
 
     // 3.2 - Kitchen and serving
     public boolean executeChefTask(int orderId) {
+        if (isGameOver()) return false;
+        if (!waiter.hasActed()) {
+            System.out.println("Choose the Waiter task (or Wait) before the Chef task.");
+            return false;
+        }
         if (chef.hasActed()) {
             System.out.println("Chef has already acted this turn.");
             return false;
@@ -185,6 +200,7 @@ public class RestaurantController {
     }
 
     public void executeTurn() {
+        if (isGameOver()) return;
         // Step 4: Eating & Automatic Cashier Payment
         // Handle customers eating -> ready to pay
         Table oldestReadyTable = null;
@@ -246,6 +262,7 @@ public class RestaurantController {
             if (c.isAbandoned()) {
                 c.setStatus(CustomerStatus.ABANDONED);
                 abandonedInQueue.add(c);
+                unhappyDepartures++;
             }
         }
         waitingQueue.removeAll(abandonedInQueue);
@@ -264,6 +281,7 @@ public class RestaurantController {
                             ord.setStatus(OrderStatus.CANCELLED);
                         }
                         table.clearTable();
+                        unhappyDepartures++;
                     }
                 }
             }
@@ -305,5 +323,3 @@ public class RestaurantController {
     }
 
 }
-
-
