@@ -1,6 +1,6 @@
 # Stage 3 UML class diagram
 
-The class diagram describes the current `stage-3/src` implementation. [PDF](stage-3-class-diagram.pdf) · [SVG](stage-3-class-diagram.svg)
+The class diagram describes the current `stage-3/src` implementation. [PDF](stage-3-class-diagram.pdf)
 
 ## Class diagram coverage
 
