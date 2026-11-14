@@ -1,7 +1,7 @@
 # SC2002 Restaurant Rush - Group Assignment
 
 **Group ID:** SCEA_Grp5  
-**Repository URL:** [Insert GitHub Repository URL here]  
+**Repository URL:** [JordBGT/sc2002_assignment](https://github.com/JordBGT/sc2002_assignment)
 
 ---
 
