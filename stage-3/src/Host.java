@@ -1,4 +1,3 @@
-/** Seats one queued customer independently of the Waiter each turn. */
 public class Host extends Staff {
     public Host(int id) { super(id); }
 
