@@ -1,4 +1,4 @@
-/** Once-per-game pricing policy; its duration advances only at turn end. */
+//once per game
 public class HappyHourPolicy {
     private boolean used;
     private int remainingTurns;
