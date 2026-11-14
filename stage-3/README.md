@@ -25,7 +25,7 @@ Stage 3 extends Stage 2 with **Host**, **ComboMeal** and **Happy Hour**. It reta
 - Shared aggregation: `ComboMeal` references two `MenuItem` components. The components remain independent menu entries and can be shared by several combos; the diagram therefore uses a hollow aggregation diamond rather than exclusive lifetime composition.
 - The controller has four staff objects in total: one Host, one Waiter, one Chef and one Cashier.
 
-The [final class diagram](stage_3_assets/Stage3_UMLClassDiagram.pdf) includes Stage 1's core classes, Stage 2's customer subclasses and Stage 3's additions. [Class diagram notes](stage_3_assets/README.md). The group sequence diagram is documented in [Stage 2](../stage-2/README.md#6-sequence-diagram).
+The [final class diagram](stage_3_assets/Stage_3_UMLClassDiagram.pdf) includes Stage 1's core classes, Stage 2's customer subclasses and Stage 3's additions. [Class diagram notes](stage_3_assets/README.md). The group sequence diagram is documented in [Stage 2](../stage-2/README.md#6-sequence-diagram).
 
 ## 2. Changes Made to Code
 
