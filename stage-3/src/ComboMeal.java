@@ -1,4 +1,3 @@
-/** Composition: a combo retains its two existing menu items. */
 public class ComboMeal extends MenuItem {
     private final MenuItem first;
     private final MenuItem second;
